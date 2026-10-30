@@ -2,6 +2,7 @@ import 'package:bank_sms_parser/bank_sms_parser.dart';
 import 'package:excel/excel.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hesabdar/services/excel_export.dart';
+import 'package:hesabdar/services/ledger.dart';
 
 void main() {
   test('writes transactions and monthly summary sheets', () {
@@ -13,7 +14,7 @@ void main() {
           receivedOn: received)!,
     ];
 
-    final excel = Excel.decodeBytes(buildLedger(ts));
+    final excel = Excel.decodeBytes(buildLedger(Ledger(ts, accountNames: {'75009': 'ملت'})));
     final rows = excel[transactionsSheet].rows;
     expect(rows, hasLength(3));
     expect(rows[1][0]!.value.toString(), '1405/08/07');
@@ -21,9 +22,14 @@ void main() {
     expect((rows[1][5]!.value as IntCellValue).value, -557000);
     expect((rows[2][5]!.value as IntCellValue).value, 534600);
     expect(rows[2][3]!.value.toString(), '75009');
+    expect(rows[2][2]!.value.toString(), 'ملت');
+    expect(rows[2][8]!.value.toString(), 'انتقال');
 
     final summary = excel[summarySheet].rows;
     expect(summary[1][0]!.value.toString(), '1405/08');
     expect((summary[1][3]!.value as IntCellValue).value, 534600 - 557000);
+
+    final cats = excel[categorySheet].rows.skip(1).map((r) => r[1]!.value.toString());
+    expect(cats, ['سایر', 'انتقال']);
   });
 }
