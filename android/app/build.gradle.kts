@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "ir.hesabdar.hesabdar"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 37 // permission_handler_android requires 37
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
