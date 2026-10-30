@@ -1,0 +1,28 @@
+name: hesabdar
+description: "A new Flutter project."
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.13.7
+
+dependencies:
+  bank_sms_parser:
+    path: packages/bank_sms_parser
+  excel: ^4.0.6
+  flutter:
+    sdk: flutter
+  flutter_sms_inbox: ^1.0.5
+  intl: ^0.20.3
+  path_provider: ^2.1.6
+  permission_handler: ^13.0.2
+  shamsi_date: ^1.1.1
+  share_plus: ^13.3.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
