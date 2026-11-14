@@ -1,0 +1,449 @@
+<title>طراحی میرزا</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,500,1,0&display=swap">
+<style>
+/* Layout: a spec sheet. Research findings first, then five phone screens on a wrapping grid, then the tokens the Flutter theme uses. */
+:root {
+  --bg: #eef1f5;
+  --paper: #ffffff;
+  --fg: #142233;
+  --muted: #5f6f82;
+  --line: #dde3ea;
+  --ink: #17365c;        /* primary: deep ink blue, the scribe's ink */
+  --ink-soft: #e3ebf5;
+  --saffron: #d9971f;    /* single accent: selected month, highlights */
+  --saffron-soft: #fbf0d9;
+  --income: #1b8a5f;
+  --income-soft: #e0f3ea;
+  --expense: #c4412f;
+  --expense-soft: #fbe6e2;
+  --phone: #f6f8fb;
+  --phone-card: #ffffff;
+  --frame: #0f1b2a;
+  --c1: #3b6fb6; --c2: #7a5bc4; --c3: #d9971f; --c4: #c4412f; --c5: #1b8a5f; --c6: #2b9bb0; --c7: #8a6d55; --c8: #8592a3;
+  --font: "Vazirmatn", "Vazir", Tahoma, system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0b121b; --paper: #121c28; --fg: #e4eaf1; --muted: #93a2b4; --line: #223143;
+  --ink: #9cc0ea; --ink-soft: #1b2b40; --saffron: #f0b445; --saffron-soft: #3a2d12;
+  --income: #4cc792; --income-soft: #12301f; --expense: #f07a68; --expense-soft: #3a1a15;
+  --phone: #0f1823; --phone-card: #172333; --frame: #000000;
+  --c1: #6f9fe0; --c2: #a68ae6; --c3: #f0b445; --c4: #f07a68; --c5: #4cc792; --c6: #5cc4d6; --c7: #c29f82; --c8: #9aa7b8;
+  color-scheme: dark;
+} }
+:root[data-theme="dark"] {
+  --bg: #0b121b; --paper: #121c28; --fg: #e4eaf1; --muted: #93a2b4; --line: #223143;
+  --ink: #9cc0ea; --ink-soft: #1b2b40; --saffron: #f0b445; --saffron-soft: #3a2d12;
+  --income: #4cc792; --income-soft: #12301f; --expense: #f07a68; --expense-soft: #3a1a15;
+  --phone: #0f1823; --phone-card: #172333; --frame: #000000;
+  --c1: #6f9fe0; --c2: #a68ae6; --c3: #f0b445; --c4: #f07a68; --c5: #4cc792; --c6: #5cc4d6; --c7: #c29f82; --c8: #9aa7b8;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font); font-size: 15px; line-height: 1.75; margin: 0; }
+.wrap { max-width: 1180px; margin: 0 auto; padding-block: 40px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 56px; }
+.ms { font-family: "Material Symbols Rounded"; font-weight: normal; font-style: normal; font-size: 20px; line-height: 1; display: inline-block; direction: ltr; -webkit-font-feature-settings: "liga"; font-feature-settings: "liga"; }
+h1, h2, h3 { text-wrap: balance; margin: 0; line-height: 1.35; }
+h1 { font-size: clamp(30px, 5vw, 44px); font-weight: 800; color: var(--ink); }
+h2 { font-size: 24px; font-weight: 800; }
+h3 { font-size: 17px; font-weight: 700; }
+p { margin: 0; max-width: 68ch; }
+.muted { color: var(--muted); }
+.eyebrow { font-size: 13px; color: var(--saffron); font-weight: 700; letter-spacing: .02em; }
+header { display: grid; gap: 14px; }
+.note { background: var(--saffron-soft); border-radius: 12px; padding: 14px 16px; max-width: 76ch; font-size: 14px; }
+section { display: grid; gap: 22px; }
+
+/* research */
+.patterns { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+.pattern { background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; display: grid; gap: 6px; align-content: start; }
+.pattern .verdict { font-size: 12.5px; font-weight: 700; }
+.verdict.take { color: var(--income); }
+.verdict.skip { color: var(--expense); }
+details { background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 12px 18px; }
+summary { cursor: pointer; font-weight: 700; }
+summary:focus-visible, a:focus-visible { outline: 2px solid var(--saffron); outline-offset: 3px; }
+.refs { columns: 2 280px; column-gap: 28px; padding: 8px 0 0; margin: 0; list-style: none; font-size: 13.5px; }
+.refs li { break-inside: avoid; padding: 3px 0; direction: ltr; text-align: left; }
+.refs a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--line); }
+
+/* phones */
+.screens { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 36px 28px; }
+figure { margin: 0; display: grid; gap: 14px; justify-items: center; align-content: start; }
+figcaption { display: grid; gap: 6px; max-width: 340px; width: 100%; }
+figcaption ul { margin: 0; padding-inline-start: 18px; font-size: 13.5px; color: var(--muted); display: grid; gap: 2px; }
+.phone { width: 100%; max-width: 340px; aspect-ratio: 340 / 700; background: var(--frame); border-radius: 38px; padding: 10px; box-shadow: 0 18px 40px -22px rgba(15, 27, 42, .55); }
+.screen { height: 100%; background: var(--phone); border-radius: 29px; overflow: hidden; display: flex; flex-direction: column; font-size: 13px; position: relative; }
+.status { display: flex; justify-content: space-between; padding: 10px 22px 4px; font-size: 11px; font-weight: 700; color: var(--muted); direction: ltr; }
+.appbar { display: flex; align-items: center; justify-content: space-between; padding: 6px 16px 10px; }
+.appbar h4 { margin: 0; font-size: 18px; font-weight: 800; }
+.iconbtn { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--phone-card); color: var(--fg); }
+.body { flex: 1; overflow: hidden; padding: 0 14px; display: flex; flex-direction: column; gap: 10px; }
+.num { font-variant-numeric: tabular-nums; }
+.navbar { display: grid; grid-template-columns: repeat(4, 1fr); background: var(--phone-card); border-top: 1px solid var(--line); padding: 8px 6px 12px; }
+.navbar div { display: grid; justify-items: center; gap: 2px; font-size: 10.5px; color: var(--muted); }
+.navbar .on { color: var(--ink); font-weight: 700; }
+.navbar .on .ms { background: var(--ink-soft); border-radius: 14px; padding: 3px 16px; }
+
+.hero { background: var(--ink); color: var(--phone); border-radius: 20px; padding: 14px 16px; display: grid; gap: 10px; }
+.hero .label { font-size: 11.5px; opacity: .8; }
+.hero .big { font-size: 24px; font-weight: 800; }
+.hero .big small { font-size: 12px; font-weight: 500; opacity: .8; }
+.hero .split { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.hero .split div { background: color-mix(in srgb, var(--phone) 14%, transparent); border-radius: 12px; padding: 7px 10px; display: grid; }
+.hero .split span { font-size: 11px; opacity: .85; }
+.hero .split b { font-size: 13.5px; }
+.chips { display: flex; gap: 6px; flex-wrap: nowrap; overflow: hidden; }
+.chip { padding: 4px 12px; border-radius: 999px; background: var(--phone-card); border: 1px solid var(--line); font-size: 12px; white-space: nowrap; color: var(--fg); }
+.chip.on { background: var(--ink); border-color: var(--ink); color: var(--phone); font-weight: 700; }
+.chip.month.on { background: var(--saffron); border-color: var(--saffron); color: #1d1405; }
+.day { font-size: 11.5px; color: var(--muted); font-weight: 700; display: flex; justify-content: space-between; padding: 2px 4px; }
+.group { background: var(--phone-card); border-radius: 16px; padding: 4px 10px; display: grid; }
+.tx { display: grid; grid-template-columns: 36px 1fr auto; gap: 10px; align-items: center; padding: 8px 0; }
+.tx + .tx { border-top: 1px solid var(--line); }
+.cat { width: 36px; height: 36px; border-radius: 12px; display: grid; place-items: center; }
+.cat .ms { font-size: 19px; }
+.tx .t { font-weight: 700; font-size: 13px; line-height: 1.4; }
+.tx .s { font-size: 11px; color: var(--muted); line-height: 1.4; }
+.amt { font-weight: 800; font-size: 13px; text-align: left; direction: ltr; }
+.amt.in { color: var(--income); }
+.amt.out { color: var(--fg); }
+.amt small { display: block; font-size: 10px; color: var(--muted); font-weight: 500; text-align: left; }
+
+.card { background: var(--phone-card); border-radius: 16px; padding: 12px 14px; display: grid; gap: 8px; }
+.row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.donut { display: grid; grid-template-columns: 120px 1fr; gap: 14px; align-items: center; }
+.donut svg { width: 120px; height: 120px; }
+.legend { display: grid; gap: 4px; font-size: 11.5px; }
+.legend div { display: flex; align-items: center; gap: 6px; }
+.dot { width: 8px; height: 8px; border-radius: 3px; flex: none; }
+.legend b { margin-inline-start: auto; font-weight: 700; }
+.bar { height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; }
+.bar i { display: block; height: 100%; border-radius: 3px; }
+.cmp { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+.cmp div { background: var(--phone); border-radius: 10px; padding: 6px 8px; display: grid; font-size: 10.5px; color: var(--muted); }
+.cmp b { color: var(--fg); font-size: 12.5px; }
+.pill { font-size: 10.5px; padding: 1px 8px; border-radius: 999px; font-weight: 700; }
+.pill.up { background: var(--expense-soft); color: var(--expense); }
+.pill.down { background: var(--income-soft); color: var(--income); }
+
+.catgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.catcard { background: var(--phone-card); border-radius: 16px; padding: 10px 12px; display: grid; gap: 6px; }
+.catcard .t { font-weight: 700; font-size: 12.5px; }
+.catcard .v { font-weight: 800; font-size: 13.5px; }
+.catcard .s { font-size: 10.5px; color: var(--muted); }
+
+.opt { display: grid; grid-template-columns: 34px 1fr auto; gap: 10px; align-items: center; padding: 9px 0; }
+.opt + .opt { border-top: 1px solid var(--line); }
+.opt .ico { width: 34px; height: 34px; border-radius: 11px; background: var(--ink-soft); color: var(--ink); display: grid; place-items: center; }
+.opt .t { font-weight: 700; font-size: 12.5px; line-height: 1.4; }
+.opt .s { font-size: 10.5px; color: var(--muted); line-height: 1.4; }
+.radio { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--line); }
+.radio.on { border: 5px solid var(--ink); }
+.switch { width: 34px; height: 20px; border-radius: 10px; background: var(--ink); position: relative; }
+.switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 14px; height: 14px; border-radius: 50%; background: var(--phone-card); }
+.switch.off { background: var(--line); }
+.switch.off::after { left: auto; right: 3px; }
+.seg { display: grid; grid-template-columns: 1fr 1fr 1fr; background: var(--phone); border-radius: 10px; padding: 3px; font-size: 11px; text-align: center; }
+.seg span { padding: 3px 0; border-radius: 8px; color: var(--muted); }
+.seg .on { background: var(--phone-card); color: var(--fg); font-weight: 700; box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+.btn { background: var(--ink); color: var(--phone); border-radius: 14px; padding: 11px; text-align: center; font-weight: 800; font-size: 13.5px; display: flex; gap: 8px; justify-content: center; align-items: center; }
+.file { display: grid; grid-template-columns: 40px 1fr; gap: 10px; align-items: center; }
+.file .ico { width: 40px; height: 40px; border-radius: 12px; background: var(--income-soft); color: var(--income); display: grid; place-items: center; }
+.sheets { display: flex; gap: 6px; flex-wrap: wrap; }
+.sheets span { font-size: 10.5px; background: var(--phone); border-radius: 8px; padding: 2px 8px; color: var(--muted); }
+
+/* tokens */
+.tokens { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+.swatches { display: grid; gap: 8px; }
+.sw { display: grid; grid-template-columns: 34px 1fr; gap: 10px; align-items: center; font-size: 13px; }
+.sw i { width: 34px; height: 34px; border-radius: 10px; border: 1px solid var(--line); }
+.typescale { display: grid; gap: 6px; }
+.catlist { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 12px; font-size: 13px; }
+.catlist div { display: flex; gap: 8px; align-items: center; }
+@media (prefers-reduced-motion: no-preference) { .phone { transition: transform .2s ease; } .phone:hover { transform: translateY(-3px); } }
+</style>
+
+<div class="wrap">
+<header>
+  <span class="eyebrow">میرزا · حسابدار پیامک‌های بانکی</span>
+  <h1>طرح رابط کاربری میرزا</h1>
+  <p class="muted">پنج صفحه‌ی اصلی اپ: تراکنش‌ها، گزارش ماهانه، دسته‌ها، خروجی اکسل و تنظیمات. همه راست‌به‌چپ، با فونت وزیرمتن و رقم‌های فارسی. عددهای داخل ماکت‌ها نمونه‌اند.</p>
+  <p class="note">دسترسی این محیط به Dribbble بسته بود و تصویر شات‌ها باز نشد. از راه جست‌وجو ۵۶ شات و ۳۰ صفحه‌ی برچسب مرتبط پیدا شد (فهرست پایین همین بخش). الگوهای زیر از عنوان و توضیح این شات‌ها و الگوهای رایج اپ‌های مالی جمع‌بندی شده، نه از دیدن تک‌تک تصویرها. با باز شدن دسترسی می‌شود یک دور بازبینی کرد.</p>
+</header>
+
+<section aria-labelledby="research">
+  <h2 id="research">الگوهای تکرارشونده و تصمیم میرزا</h2>
+  <div class="patterns">
+    <div class="pattern"><h3>کارت موجودی بالای صفحه</h3><p class="muted">تقریباً همه‌ی اپ‌های بانکی و کیف پول یک کارت پررنگ با موجودی و دو عدد واریز و برداشت دارند.</p><span class="verdict take">برداشتیم: کارت جوهری با مانده‌ی آخرین پیامک و جمع ماه جاری.</span></div>
+    <div class="pattern"><h3>فهرست تراکنش گروه‌بندی‌شده با روز</h3><p class="muted">سرتیترهای «امروز»، «دیروز» و تاریخ، با جمع روز کنارش. آیکن دسته در مربع گرد رنگی.</p><span class="verdict take">برداشتیم، با تاریخ شمسی و جمع خالص هر روز.</span></div>
+    <div class="pattern"><h3>فیلتر چیپی</h3><p class="muted">همه / واریز / برداشت و گاهی بانک یا کارت، به صورت چیپ افقی زیر کارت اصلی.</p><span class="verdict take">برداشتیم: نوع تراکنش و حساب.</span></div>
+    <div class="pattern"><h3>دونات دسته‌ها در گزارش</h3><p class="muted">نمودار دونات یا میله‌ای هزینه به تفکیک دسته، با درصد و مقایسه با ماه قبل.</p><span class="verdict take">برداشتیم: دونات + فهرست دسته با میله و درصد، و مقایسه با ماه قبل.</span></div>
+    <div class="pattern"><h3>انتخاب ماه افقی</h3><p class="muted">ردیف ماه‌ها یا فلش قبلی/بعدی به جای منوی کشویی.</p><span class="verdict take">برداشتیم: چیپ ماه‌ها با رنگ زعفرانی برای ماه انتخاب‌شده.</span></div>
+    <div class="pattern"><h3>ناوبری پایین با ۴ تا ۵ زبانه</h3><p class="muted">خانه، آمار، کارت‌ها، پروفایل. اغلب با دکمه‌ی شناور «افزودن» در وسط.</p><span class="verdict take">برداشتیم ۴ زبانه.</span> <span class="verdict skip">دکمه‌ی افزودن را حذف کردیم؛ تراکنش از پیامک می‌آید.</span></div>
+    <div class="pattern"><h3>کارت‌های بانکی گرافیکی</h3><p class="muted">تصویر کارت بانکی با گرادیان و شماره‌ی کارت در صفحه‌ی اصلی.</p><span class="verdict skip">نگرفتیم: پیامک شماره‌ی حساب می‌دهد نه کارت؛ به جایش نام‌گذاری حساب‌ها در تنظیمات.</span></div>
+    <div class="pattern"><h3>حالت تیره کامل</h3><p class="muted">بیشتر کیت‌های جدید هر دو حالت روشن و تیره را دارند.</p><span class="verdict take">برداشتیم: پیروی از سیستم، با انتخاب دستی در تنظیمات.</span></div>
+    <div class="pattern"><h3>خروجی گرفتن</h3><p class="muted">صفحه‌ی خروجی کم‌تر دیده می‌شود؛ معمولاً یک برگه با بازه‌ی زمانی، قالب فایل و دکمه‌ی اشتراک.</p><span class="verdict take">برداشتیم: انتخاب بازه، پیش‌نمایش برگه‌های فایل، دکمه‌ی ساخت و اشتراک.</span></div>
+  </div>
+  <details>
+    <summary>شات‌ها و برچسب‌های پیداشده در Dribbble (۵۶ شات، ۳۰ برچسب)</summary>
+    <ul class="refs">
+      <li><a href="https://dribbble.com/shots/25187928-PennyWise-Budget-Expense-Tracker-App">PennyWise – Budget &amp; Expense Tracker</a></li>
+      <li><a href="https://dribbble.com/shots/25493149-Zyric-Budget-and-Expense-Tracker-App">Zyric – Budget and Expense Tracker</a></li>
+      <li><a href="https://dribbble.com/shots/22702055-Budget-Flow-Expense-Tracker">Budget Flow – Expense Tracker</a></li>
+      <li><a href="https://dribbble.com/shots/19476154-Credit-Card-Expense-Tracker-App">Credit Card Expense Tracker</a></li>
+      <li><a href="https://dribbble.com/shots/18276626-Family-expense-tracker-app">Family expense tracker</a></li>
+      <li><a href="https://dribbble.com/shots/6037420-Expense-Tracker-App">Expense Tracker App (eleken)</a></li>
+      <li><a href="https://dribbble.com/shots/19043816-Expense-Tracker-App">Expense Tracker App (Brilworks)</a></li>
+      <li><a href="https://dribbble.com/shots/12101566-Finance-Expense-Tracker-App">Finance &amp; Expense Tracker</a></li>
+      <li><a href="https://dribbble.com/shots/14326527-Expense-Tracker-App-Design">Expense Tracker App Design (Purrweb)</a></li>
+      <li><a href="https://dribbble.com/shots/14401316-Expense-tracker-app">Expense tracker app (Ajay Sivan)</a></li>
+      <li><a href="https://dribbble.com/shots/6290548-DailyUI-Expense-Tracker-app">DailyUI Expense Tracker</a></li>
+      <li><a href="https://dribbble.com/shots/9470949-Expense-Tracker-App-Icon">Expense Tracker App Icon</a></li>
+      <li><a href="https://dribbble.com/shots/15219003-Digital-Personal-Finance-Mobile-App">Digital Personal Finance</a></li>
+      <li><a href="https://dribbble.com/shots/24209753-Personal-Finance-Mobile-App">Personal Finance Mobile App (ARC)</a></li>
+      <li><a href="https://dribbble.com/shots/22113521-Payly-Personal-Finance-Mobile-App">Payly – Personal Finance</a></li>
+      <li><a href="https://dribbble.com/shots/21375915-Finance-Management-Mobile-App">Finance Management (Conceptzilla)</a></li>
+      <li><a href="https://dribbble.com/shots/15110272-Banking-App">Banking App (Purrweb)</a></li>
+      <li><a href="https://dribbble.com/shots/26041507-Banking-Web-App-UI-UX-Design">Banking Web App (Ronas IT)</a></li>
+      <li><a href="https://dribbble.com/shots/3349782-Home-Budget-App-Mobile">Home Budget App (tubik)</a></li>
+      <li><a href="https://dribbble.com/shots/23194402-Budget-tracking-app-mobile-app-uiux-app-design">Budget tracking app (Implse)</a></li>
+      <li><a href="https://dribbble.com/shots/3810106-Personal-budget-manager-mobile-UI">Personal budget manager</a></li>
+      <li><a href="https://dribbble.com/shots/3925722--Budget-iOS-App">Budget iOS App</a></li>
+      <li><a href="https://dribbble.com/shots/15564468-Transaction-History-mobile-app">Transaction History mobile app</a></li>
+      <li><a href="https://dribbble.com/shots/21034984-Transaction-history-details-Bankito-banking-mobile-app">Bankito – Transaction history &amp; details</a></li>
+      <li><a href="https://dribbble.com/shots/10725062-Money-manager-app-part-1">Money manager app</a></li>
+      <li><a href="https://dribbble.com/shots/21407653-Money-Management-App-UI">Money Management App (Ofspace)</a></li>
+      <li><a href="https://dribbble.com/shots/22343655-Finance-Manager-Mobile-iOS-App">Finance Manager iOS (Purrweb)</a></li>
+      <li><a href="https://dribbble.com/shots/17403766-E-Wallet-App-Light-Dark-Mode">E-Wallet App Light/Dark</a></li>
+      <li><a href="https://dribbble.com/shots/15902883-Finance-App-with-Dark-and-Light-Mode">Finance App Dark &amp; Light</a></li>
+      <li><a href="https://dribbble.com/shots/15270913-Wallet-App">Wallet App (Sajjad Mohammadi Nia)</a></li>
+      <li><a href="https://dribbble.com/shots/16968199-Dark-UI-Wallet-App">Dark UI Wallet App</a></li>
+      <li><a href="https://dribbble.com/shots/14751592-Digital-Wallet-App-Component-Light-and-Dark">Digital Wallet Components</a></li>
+      <li><a href="https://dribbble.com/shots/25239343-Banking-Mobile-App-Design-Concept">Banking Mobile App Concept (Ronas IT)</a></li>
+      <li><a href="https://dribbble.com/shots/15727801-Mobile-Banking-App-Design-Concept">Mobile Banking Concept (Andersen)</a></li>
+      <li><a href="https://dribbble.com/shots/17555007-Banking-App-Concept">Banking App Concept (Maher Badeddi)</a></li>
+      <li><a href="https://dribbble.com/shots/16549367-Banking-Mobile-App-Concept-Lazarev">Banking Mobile App (Lazarev)</a></li>
+      <li><a href="https://dribbble.com/shots/23716865-Mobile-Banking-App">Mobile Banking App (Shakuro)</a></li>
+      <li><a href="https://dribbble.com/shots/6805916-Banking-app-concept">Banking app concept (Fred Zachinov)</a></li>
+      <li><a href="https://dribbble.com/shots/6993698-IniBank-Mobile-Banking-App-Concept">IniBank</a></li>
+      <li><a href="https://dribbble.com/shots/15726793-Mobile-banking-app-concept">Mobile banking concept (Qubstudio)</a></li>
+      <li><a href="https://dribbble.com/shots/5892531-myBank-Mobile-Banking-App-Concept">myBank</a></li>
+      <li><a href="https://dribbble.com/shots/14708230-Bank-of-America-Online-Banking-Mobile-App-Concept">Online Banking Concept</a></li>
+      <li><a href="https://dribbble.com/shots/2607751-Arabic-Personal-Money-Finance-Manager-UI">Arabic Personal Finance Manager (RTL)</a></li>
+      <li><a href="https://dribbble.com/shots/23964356-Naqdi-Arabic-FinTech-App-UI">Naqdi – Arabic FinTech (RTL)</a></li>
+      <li><a href="https://dribbble.com/shots/23638529-Donut-Pie-Charts-for-Financial-Mobile-App">Donut &amp; Pie Charts for Finance</a></li>
+      <li><a href="https://dribbble.com/shots/18874425-Data-visualization-app-UI-kit-Donut-Charts">Data viz UI kit – Donut Charts</a></li>
+      <li><a href="https://dribbble.com/shots/18753894-Universal-Data-Visualization-Donut-Chart">Universal Data Viz – Donut</a></li>
+      <li><a href="https://dribbble.com/shots/18218955-HOPEUI-Donut-Chart">HOPEUI Donut Chart</a></li>
+      <li><a href="https://dribbble.com/shots/620671-Analytics-donut-chart">Analytics donut chart</a></li>
+      <li><a href="https://dribbble.com/shots/15202728-Visz-Finance-Mobile-Apps-Part-2">Visz Finance – Part 2 (settings)</a></li>
+      <li><a href="https://dribbble.com/shots/1734255-Walle-Finance-App-Settings-Date-Picker">Walle Finance – Settings</a></li>
+      <li><a href="https://dribbble.com/shots/6376372-Profile">Edit profile page</a></li>
+      <li><a href="https://dribbble.com/shots/24935084-Finzo-Finance-App-UI-Kit">Finzo – Finance UI Kit</a></li>
+      <li><a href="https://dribbble.com/shots/20899679-Financial-reporting-widget">Financial reporting widget</a></li>
+      <li><a href="https://dribbble.com/tags/expense-tracker">tag: expense-tracker</a> · <a href="https://dribbble.com/tags/personal-finance-app">personal-finance-app</a> · <a href="https://dribbble.com/tags/finance-app">finance-app</a></li>
+      <li><a href="https://dribbble.com/tags/banking-app">tag: banking-app</a> · <a href="https://dribbble.com/tags/transaction-history">transaction-history</a> · <a href="https://dribbble.com/tags/transaction-list">transaction-list</a></li>
+      <li><a href="https://dribbble.com/tags/budget-app">tag: budget-app</a> · <a href="https://dribbble.com/tags/money-manager">money-manager</a> · <a href="https://dribbble.com/tags/spending-tracker">spending-tracker</a></li>
+      <li><a href="https://dribbble.com/tags/rtl">tag: rtl</a> · <a href="https://dribbble.com/tags/persian_payment">persian_payment</a> · <a href="https://dribbble.com/tags/arabic-ui">arabic-ui</a></li>
+      <li><a href="https://dribbble.com/tags/monthly-report">tag: monthly-report</a> · <a href="https://dribbble.com/tags/doughnut-chart">doughnut-chart</a> · <a href="https://dribbble.com/tags/spend_analysis">spend_analysis</a></li>
+      <li><a href="https://dribbble.com/tags/dark_finance_app">tag: dark_finance_app</a> · <a href="https://dribbble.com/tags/fintech-ui-kit">fintech-ui-kit</a> · <a href="https://dribbble.com/tags/data_export">data_export</a></li>
+    </ul>
+  </details>
+</section>
+
+<section aria-labelledby="screens">
+  <h2 id="screens">صفحه‌ها</h2>
+  <div class="screens">
+
+  <!-- 1. Transactions -->
+  <figure>
+    <div class="phone"><div class="screen">
+      <div class="status"><span>9:41</span><span>LTE ▮▮▮</span></div>
+      <div class="appbar"><h4>میرزا</h4><span class="iconbtn"><span class="ms">refresh</span></span></div>
+      <div class="body">
+        <div class="hero">
+          <div><div class="label">مانده‌ی آخرین پیامک · بلو</div><div class="big num">۱۸٬۴۲۶٬۰۰۰ <small>ریال</small></div></div>
+          <div class="split">
+            <div><span>واریز آبان</span><b class="num">+۴۲٬۱۰۰٬۰۰۰</b></div>
+            <div><span>برداشت آبان</span><b class="num">−۲۳٬۶۷۴٬۰۰۰</b></div>
+          </div>
+        </div>
+        <div class="chips"><span class="chip on">همه</span><span class="chip">واریز</span><span class="chip">برداشت</span><span class="chip">بلو</span><span class="chip">رسالت</span></div>
+        <div class="day"><span>امروز · ۷ آبان</span><span class="num">−۱٬۲۸۰٬۰۰۰</span></div>
+        <div class="group">
+          <div class="tx"><span class="cat" style="background: color-mix(in srgb, var(--c1) 16%, transparent); color: var(--c1)"><span class="ms">shopping_bag</span></span><div><div class="t">خرید</div><div class="s">بلو · ۱۳:۱۹</div></div><div class="amt out num">−۸۵۰٬۰۰۰<small>ریال</small></div></div>
+          <div class="tx"><span class="cat" style="background: color-mix(in srgb, var(--c3) 18%, transparent); color: var(--c3)"><span class="ms">receipt_long</span></span><div><div class="t">قبوض</div><div class="s">رسالت · ۰۹:۵۸</div></div><div class="amt out num">−۴۳۰٬۰۰۰<small>ریال</small></div></div>
+        </div>
+        <div class="day"><span>دیروز · ۶ آبان</span><span class="num">+۵۳۴٬۶۰۰</span></div>
+        <div class="group">
+          <div class="tx"><span class="cat" style="background: color-mix(in srgb, var(--c2) 16%, transparent); color: var(--c2)"><span class="ms">swap_horiz</span></span><div><div class="t">انتقال · پایا</div><div class="s">حساب ۷۵۰۰۹ · ۱۳:۱۹</div></div><div class="amt in num">+۵۳۴٬۶۰۰<small>ریال</small></div></div>
+          <div class="tx"><span class="cat" style="background: color-mix(in srgb, var(--c8) 18%, transparent); color: var(--c8)"><span class="ms">account_balance</span></span><div><div class="t">کارمزد بانکی</div><div class="s">بلو · کارمزد پیامک</div></div><div class="amt out num">−۴۶٬۴۰۰<small>ریال</small></div></div>
+        </div>
+      </div>
+      <div class="navbar"><div class="on"><span class="ms">receipt_long</span>تراکنش‌ها</div><div><span class="ms">donut_large</span>گزارش</div><div><span class="ms">category</span>دسته‌ها</div><div><span class="ms">settings</span>تنظیمات</div></div>
+    </div></div>
+    <figcaption><h3>۱. تراکنش‌ها</h3><ul><li>کارت جوهری: مانده‌ی آخرین پیامک و جمع واریز و برداشت ماه جاری.</li><li>چیپ‌های فیلتر بر اساس نوع و حساب.</li><li>گروه‌بندی با روز شمسی و جمع خالص هر روز.</li><li>لمس هر ردیف: برگه‌ی پایین برای تغییر دسته و نام حساب.</li></ul></figcaption>
+  </figure>
+
+  <!-- 2. Monthly report -->
+  <figure>
+    <div class="phone"><div class="screen">
+      <div class="status"><span>9:41</span><span>LTE ▮▮▮</span></div>
+      <div class="appbar"><h4>گزارش ماهانه</h4><span class="iconbtn"><span class="ms">ios_share</span></span></div>
+      <div class="body">
+        <div class="chips"><span class="chip month on">آبان ۱۴۰۵</span><span class="chip month">مهر</span><span class="chip month">شهریور</span><span class="chip month">مرداد</span></div>
+        <div class="card">
+          <div class="row"><span class="muted">خالص ماه</span><span class="pill down">۱۸٪ کم‌خرج‌تر از مهر</span></div>
+          <div class="num" style="font-size: 22px; font-weight: 800; color: var(--income)">+۱۸٬۴۲۶٬۰۰۰ <small style="font-size: 11px; color: var(--muted); font-weight: 500">ریال</small></div>
+          <div class="cmp"><div>واریز<b class="num">۴۲٫۱ م</b></div><div>برداشت<b class="num">۲۳٫۷ م</b></div><div>تراکنش<b class="num">۶۴</b></div></div>
+        </div>
+        <div class="card">
+          <h3 style="font-size: 13.5px">برداشت به تفکیک دسته</h3>
+          <div class="donut">
+            <svg viewBox="0 0 42 42" role="img" aria-label="دونات سهم دسته‌ها">
+              <circle cx="21" cy="21" r="15.9" fill="none" stroke="var(--line)" stroke-width="6"></circle>
+              <circle cx="21" cy="21" r="15.9" fill="none" stroke="var(--c1)" stroke-width="6" stroke-dasharray="38 62" stroke-dashoffset="25"></circle>
+              <circle cx="21" cy="21" r="15.9" fill="none" stroke="var(--c4)" stroke-width="6" stroke-dasharray="24 76" stroke-dashoffset="-13"></circle>
+              <circle cx="21" cy="21" r="15.9" fill="none" stroke="var(--c3)" stroke-width="6" stroke-dasharray="17 83" stroke-dashoffset="-37"></circle>
+              <circle cx="21" cy="21" r="15.9" fill="none" stroke="var(--c2)" stroke-width="6" stroke-dasharray="14 86" stroke-dashoffset="-54"></circle>
+              <circle cx="21" cy="21" r="15.9" fill="none" stroke="var(--c8)" stroke-width="6" stroke-dasharray="7 93" stroke-dashoffset="-68"></circle>
+              <text x="21" y="20" text-anchor="middle" font-size="5" font-weight="800" fill="var(--fg)" font-family="Vazirmatn, sans-serif">۲۳٫۷</text>
+              <text x="21" y="26" text-anchor="middle" font-size="3.2" fill="var(--muted)" font-family="Vazirmatn, sans-serif">میلیون ریال</text>
+            </svg>
+            <div class="legend">
+              <div><i class="dot" style="background: var(--c1)"></i>خرید<b class="num">۳۸٪</b></div>
+              <div><i class="dot" style="background: var(--c4)"></i>اقساط<b class="num">۲۴٪</b></div>
+              <div><i class="dot" style="background: var(--c3)"></i>قبوض<b class="num">۱۷٪</b></div>
+              <div><i class="dot" style="background: var(--c2)"></i>انتقال<b class="num">۱۴٪</b></div>
+              <div><i class="dot" style="background: var(--c8)"></i>سایر<b class="num">۷٪</b></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="row"><span style="font-weight: 700">خرید</span><span class="num" style="font-weight: 800">۸٬۹۹۶٬۰۰۰</span></div>
+          <div class="bar"><i style="width: 100%; background: var(--c1)"></i></div>
+          <div class="row"><span style="font-weight: 700">اقساط</span><span class="num" style="font-weight: 800">۵٬۶۸۲٬۰۰۰</span></div>
+          <div class="bar"><i style="width: 63%; background: var(--c4)"></i></div>
+        </div>
+      </div>
+      <div class="navbar"><div><span class="ms">receipt_long</span>تراکنش‌ها</div><div class="on"><span class="ms">donut_large</span>گزارش</div><div><span class="ms">category</span>دسته‌ها</div><div><span class="ms">settings</span>تنظیمات</div></div>
+    </div></div>
+    <figcaption><h3>۲. گزارش ماهانه</h3><ul><li>ردیف چیپ ماه‌ها به جای منوی کشویی؛ ماه انتخاب‌شده زعفرانی.</li><li>خالص ماه با مقایسه‌ی برداشت نسبت به ماه قبل.</li><li>دونات سهم دسته‌ها و زیرش میله‌ی هر دسته.</li><li>دکمه‌ی اشتراک بالا، خروجی اکسل همان ماه را باز می‌کند.</li></ul></figcaption>
+  </figure>
+
+  <!-- 3. Categories -->
+  <figure>
+    <div class="phone"><div class="screen">
+      <div class="status"><span>9:41</span><span>LTE ▮▮▮</span></div>
+      <div class="appbar"><h4>دسته‌ها</h4><span class="chip month on" style="font-size: 11px">آبان ۱۴۰۵</span></div>
+      <div class="body">
+        <div class="catgrid">
+          <div class="catcard"><span class="cat" style="background: color-mix(in srgb, var(--c1) 16%, transparent); color: var(--c1)"><span class="ms">shopping_bag</span></span><span class="t">خرید</span><span class="v num">۸٬۹۹۶٬۰۰۰</span><span class="s">۲۱ تراکنش</span></div>
+          <div class="catcard"><span class="cat" style="background: color-mix(in srgb, var(--c2) 16%, transparent); color: var(--c2)"><span class="ms">swap_horiz</span></span><span class="t">انتقال</span><span class="v num">۳٬۳۱۴٬۰۰۰</span><span class="s">۹ تراکنش · ۲ واریز</span></div>
+          <div class="catcard"><span class="cat" style="background: color-mix(in srgb, var(--c3) 18%, transparent); color: var(--c3)"><span class="ms">receipt_long</span></span><span class="t">قبوض</span><span class="v num">۴٬۰۲۰٬۰۰۰</span><span class="s">۵ تراکنش</span></div>
+          <div class="catcard"><span class="cat" style="background: color-mix(in srgb, var(--c4) 16%, transparent); color: var(--c4)"><span class="ms">event_repeat</span></span><span class="t">اقساط</span><span class="v num">۵٬۶۸۲٬۰۰۰</span><span class="s">۲ تراکنش</span></div>
+          <div class="catcard"><span class="cat" style="background: color-mix(in srgb, var(--c5) 16%, transparent); color: var(--c5)"><span class="ms">work</span></span><span class="t">حقوق</span><span class="v num" style="color: var(--income)">+۴۰٬۰۰۰٬۰۰۰</span><span class="s">۱ تراکنش</span></div>
+          <div class="catcard"><span class="cat" style="background: color-mix(in srgb, var(--c6) 16%, transparent); color: var(--c6)"><span class="ms">trending_up</span></span><span class="t">سود</span><span class="v num" style="color: var(--income)">+۱٬۵۶۵٬۴۰۰</span><span class="s">۱ تراکنش</span></div>
+          <div class="catcard"><span class="cat" style="background: color-mix(in srgb, var(--c7) 16%, transparent); color: var(--c7)"><span class="ms">account_balance</span></span><span class="t">کارمزد بانکی</span><span class="v num">۹۲٬۸۰۰</span><span class="s">۲ تراکنش</span></div>
+          <div class="catcard"><span class="cat" style="background: color-mix(in srgb, var(--c8) 18%, transparent); color: var(--c8)"><span class="ms">more_horiz</span></span><span class="t">سایر</span><span class="v num">۱٬۵۶۹٬۲۰۰</span><span class="s">۲۳ تراکنش</span></div>
+        </div>
+      </div>
+      <div class="navbar"><div><span class="ms">receipt_long</span>تراکنش‌ها</div><div><span class="ms">donut_large</span>گزارش</div><div class="on"><span class="ms">category</span>دسته‌ها</div><div><span class="ms">settings</span>تنظیمات</div></div>
+    </div></div>
+    <figcaption><h3>۳. دسته‌ها</h3><ul><li>هشت دسته‌ی ثابت هر کدام با رنگ و آیکن خودش؛ همین رنگ در فهرست و دونات تکرار می‌شود.</li><li>جمع ماه و تعداد تراکنش هر دسته.</li><li>لمس کارت: فهرست تراکنش‌های همان دسته.</li><li>«سایر» پرتعداد یعنی وقت دسته‌بندی دستی است.</li></ul></figcaption>
+  </figure>
+
+  <!-- 4. Export -->
+  <figure>
+    <div class="phone"><div class="screen">
+      <div class="status"><span>9:41</span><span>LTE ▮▮▮</span></div>
+      <div class="appbar"><span class="iconbtn"><span class="ms">arrow_forward</span></span><h4>خروجی اکسل</h4><span style="width: 34px"></span></div>
+      <div class="body">
+        <div class="card">
+          <h3 style="font-size: 13.5px">بازه</h3>
+          <div class="opt"><span class="ico"><span class="ms">calendar_month</span></span><div><div class="t">آبان ۱۴۰۵</div><div class="s">۶۴ تراکنش</div></div><span class="radio on"></span></div>
+          <div class="opt"><span class="ico"><span class="ms">date_range</span></span><div><div class="t">همه‌ی ماه‌ها</div><div class="s">۲۸۷ تراکنش از مرداد</div></div><span class="radio"></span></div>
+        </div>
+        <div class="card">
+          <h3 style="font-size: 13.5px">داخل فایل</h3>
+          <div class="file"><span class="ico"><span class="ms">table_view</span></span><div><div style="font-weight: 700">mirza-1405-08.xlsx</div><div class="sheets"><span>تراکنش‌ها</span><span>گزارش ماهانه</span><span>دسته‌بندی</span></div></div></div>
+          <p class="muted" style="font-size: 11px">مبلغ‌ها به ریال و علامت‌دار؛ ستون مبلغ مستقیم جمع می‌خورد.</p>
+        </div>
+        <div style="flex: 1"></div>
+        <div class="btn"><span class="ms">ios_share</span>ساخت و اشتراک فایل</div>
+        <div style="height: 6px"></div>
+      </div>
+      <div class="navbar"><div><span class="ms">receipt_long</span>تراکنش‌ها</div><div class="on"><span class="ms">donut_large</span>گزارش</div><div><span class="ms">category</span>دسته‌ها</div><div><span class="ms">settings</span>تنظیمات</div></div>
+    </div></div>
+    <figcaption><h3>۴. خروجی اکسل</h3><ul><li>انتخاب بازه: ماه جاری یا همه‌ی ماه‌ها، با تعداد تراکنش.</li><li>پیش‌نمایش نام فایل و برگه‌های داخلش.</li><li>یک دکمه‌ی اصلی پایین صفحه، در دسترس انگشت.</li></ul></figcaption>
+  </figure>
+
+  <!-- 5. Settings -->
+  <figure>
+    <div class="phone"><div class="screen">
+      <div class="status"><span>9:41</span><span>LTE ▮▮▮</span></div>
+      <div class="appbar"><h4>تنظیمات</h4><span style="width: 34px"></span></div>
+      <div class="body">
+        <div class="card">
+          <h3 style="font-size: 13.5px">حساب‌ها</h3>
+          <div class="opt"><span class="ico"><span class="ms">account_balance_wallet</span></span><div><div class="t">بلو</div><div class="s">از پیامک بلو</div></div><span class="ms muted">edit</span></div>
+          <div class="opt"><span class="ico"><span class="ms">account_balance</span></span><div><div class="t">رسالت</div><div class="s num">10.9554759.1</div></div><span class="ms muted">edit</span></div>
+          <div class="opt"><span class="ico"><span class="ms">help</span></span><div><div class="t">بدون نام</div><div class="s num">75009</div></div><span class="ms muted">edit</span></div>
+        </div>
+        <div class="card">
+          <h3 style="font-size: 13.5px">نمایش</h3>
+          <div class="opt"><span class="ico"><span class="ms">payments</span></span><div><div class="t">واحد مبلغ</div><div class="s">فقط نمایش؛ اکسل ریالی می‌ماند</div></div><span class="chip on" style="font-size: 11px">ریال</span></div>
+          <div class="opt"><span class="ico"><span class="ms">dark_mode</span></span><div class="seg" style="grid-column: span 2"><span>روشن</span><span class="on">سیستم</span><span>تیره</span></div></div>
+        </div>
+        <div class="card">
+          <div class="opt"><span class="ico"><span class="ms">sms</span></span><div><div class="t">خواندن دوباره‌ی پیامک‌ها</div><div class="s">آخرین بار: امروز ۹:۴۰</div></div><span class="ms muted">chevron_left</span></div>
+        </div>
+      </div>
+      <div class="navbar"><div><span class="ms">receipt_long</span>تراکنش‌ها</div><div><span class="ms">donut_large</span>گزارش</div><div><span class="ms">category</span>دسته‌ها</div><div class="on"><span class="ms">settings</span>تنظیمات</div></div>
+    </div></div>
+    <figcaption><h3>۵. تنظیمات</h3><ul><li>نام‌گذاری حساب‌ها (مثلاً ۱۰.۹۵۵۴۷۵۹.۱ ← رسالت) یک‌جا، نه فقط از برگه‌ی تراکنش.</li><li>واحد نمایش ریال یا تومان.</li><li>حالت روشن، تیره یا پیروی از سیستم.</li><li>خواندن دوباره‌ی پیامک‌ها.</li></ul></figcaption>
+  </figure>
+
+  </div>
+</section>
+
+<section aria-labelledby="tokens">
+  <h2 id="tokens">پایه‌های طرح</h2>
+  <div class="tokens">
+    <div class="pattern"><h3>رنگ</h3>
+      <div class="swatches">
+        <div class="sw"><i style="background: var(--ink)"></i><span>جوهری: رنگ اصلی، کارت موجودی، دکمه‌ها</span></div>
+        <div class="sw"><i style="background: var(--saffron)"></i><span>زعفرانی: فقط ماه انتخاب‌شده و نکته‌ها</span></div>
+        <div class="sw"><i style="background: var(--income)"></i><span>سبز: واریز</span></div>
+        <div class="sw"><i style="background: var(--expense)"></i><span>قرمز: هشدار و افزایش خرج؛ برداشت عادی با رنگ متن</span></div>
+      </div>
+    </div>
+    <div class="pattern"><h3>حروف</h3>
+      <div class="typescale">
+        <span style="font-size: 26px; font-weight: 800" class="num">۱۸٬۴۲۶٬۰۰۰</span>
+        <span style="font-size: 18px; font-weight: 800">عنوان صفحه</span>
+        <span style="font-size: 14px; font-weight: 700">عنوان ردیف</span>
+        <span style="font-size: 12px" class="muted">توضیح · بانک · ساعت</span>
+      </div>
+      <p class="muted" style="font-size: 13px">وزیرمتن در سه وزن، رقم‌های فارسی با جداکننده‌ی هزارگان «٬» و عددهای هم‌عرض.</p>
+    </div>
+    <div class="pattern"><h3>دسته‌ها</h3>
+      <div class="catlist">
+        <div><span class="ms" style="color: var(--c1)">shopping_bag</span>خرید</div>
+        <div><span class="ms" style="color: var(--c2)">swap_horiz</span>انتقال</div>
+        <div><span class="ms" style="color: var(--c3)">receipt_long</span>قبوض</div>
+        <div><span class="ms" style="color: var(--c4)">event_repeat</span>اقساط</div>
+        <div><span class="ms" style="color: var(--c5)">work</span>حقوق</div>
+        <div><span class="ms" style="color: var(--c6)">trending_up</span>سود</div>
+        <div><span class="ms" style="color: var(--c7)">account_balance</span>کارمزد بانکی</div>
+        <div><span class="ms" style="color: var(--c8)">more_horiz</span>سایر</div>
+      </div>
+    </div>
+    <div class="pattern"><h3>شکل</h3>
+      <p class="muted" style="font-size: 13px">گوشه‌ی ۱۶ برای کارت‌ها، ۱۲ برای آیکن دسته، چیپ‌ها کاملاً گرد. سایه فقط روی دکمه‌ی اصلی؛ بقیه با رنگ زمینه از هم جدا می‌شوند. فاصله‌ها مضرب ۴.</p>
+    </div>
+  </div>
+</section>
+</div>
