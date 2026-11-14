@@ -9,10 +9,12 @@ environment:
 dependencies:
   bank_sms_parser:
     path: packages/bank_sms_parser
+  crypto: ^3.0.8
   excel: ^4.0.6
   flutter:
     sdk: flutter
   flutter_sms_inbox: ^1.0.5
+  http: ^1.6.0
   intl: ^0.20.3
   material_ui: ^1.11.0
   path_provider: ^2.1.6
@@ -20,6 +22,7 @@ dependencies:
   shamsi_date: ^1.1.1
   share_plus: ^13.3.1
   shared_preferences: ^2.5.6
+  workmanager: ^0.10.10
 
 dev_dependencies:
   flutter_test:
@@ -28,6 +31,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/google_apps_script.gs
   fonts:
     - family: Vazirmatn
       fonts:

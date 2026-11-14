@@ -3,6 +3,8 @@ import 'package:material_ui/material_ui.dart';
 import '../services/format.dart';
 import '../services/ledger.dart';
 import '../services/settings.dart';
+import 'senders_screen.dart';
+import 'sheets_screen.dart';
 
 /// Account names, display unit, theme and re-reading the inbox.
 class SettingsView extends StatelessWidget {
@@ -79,6 +81,26 @@ class SettingsView extends StatelessWidget {
               trailing: const Icon(Icons.edit_rounded),
               onTap: () => _rename(context, a),
             ),
+        ]),
+        const SizedBox(height: 12),
+        section('خودکارسازی', [
+          ListTile(
+            leading: const Icon(Icons.mark_email_read_rounded),
+            title: const Text('سرشماره‌ی بانک‌ها'),
+            subtitle: const Text('فقط پیامک این فرستنده‌ها خوانده می‌شود'),
+            trailing: const Icon(Icons.chevron_left_rounded),
+            onTap: () async {
+              final saved = await Navigator.push<bool>(context, MaterialPageRoute(builder: (_) => const SendersScreen()));
+              if (saved == true) onReload();
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.cloud_upload_rounded),
+            title: const Text('گوگل شیت'),
+            subtitle: const Text('ثبت خودکار تراکنش‌ها در شیت'),
+            trailing: const Icon(Icons.chevron_left_rounded),
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SheetsScreen())),
+          ),
         ]),
         const SizedBox(height: 12),
         section('نمایش', [

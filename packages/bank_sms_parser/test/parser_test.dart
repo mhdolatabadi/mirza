@@ -104,4 +104,31 @@ void main() {
       expect(parseSms(sms, receivedOn: received), isNull, reason: sms);
     }
   });
+
+  group('trusted sender', () {
+    test('accepts a signed amount without a balance line', () {
+      const sms = '10.9554759.1\n-46,400\n08/04_09:58';
+      expect(parseSms(sms, receivedOn: received), isNull);
+      final t = parseSms(sms, receivedOn: received, trustedSender: true)!;
+      expect(t.type, TransactionType.debit);
+      expect(t.amount, 46400);
+      expect(t.date, const JalaliDate(1405, 8, 4));
+    });
+
+    test('falls back to keywords', () {
+      const sms = 'بانک شهر\nخرید از کارت 6037-1234 به مبلغ 1,250,000 ریال\n1405/08/10 12:30\nموجودی 9,000,000';
+      expect(parseSms(sms, receivedOn: received), isNull);
+      final t = parseSms(sms, receivedOn: received, trustedSender: true)!;
+      expect(t.type, TransactionType.debit);
+      expect(t.amount, 1250000);
+      expect(t.balance, 9000000);
+      expect(t.account, '6037-1234');
+      expect(t.date, const JalaliDate(1405, 8, 10));
+      expect(t.time, '12:30');
+    });
+
+    test('still ignores OTPs', () {
+      expect(parseSms('رمز پویا شما: 123456', receivedOn: received, trustedSender: true), isNull);
+    });
+  });
 }
