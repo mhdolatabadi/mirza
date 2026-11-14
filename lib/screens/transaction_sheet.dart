@@ -1,5 +1,5 @@
 import 'package:bank_sms_parser/bank_sms_parser.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../services/categories.dart';
 
