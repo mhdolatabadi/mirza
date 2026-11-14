@@ -1,11 +1,14 @@
 import 'package:bank_sms_parser/bank_sms_parser.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../services/format.dart';
 import '../services/ledger.dart';
 import '../services/ledger_store.dart';
 import '../services/report.dart';
 import '../services/settings.dart';
+import '../services/sheets_sync.dart';
 import '../services/sms_reader.dart';
+import '../services/sync_settings.dart';
 import 'categories_view.dart';
 import 'export_screen.dart';
 import 'report_view.dart';
@@ -60,12 +63,30 @@ class _HomeScreenState extends State<HomeScreen> {
         _lastLoaded = DateTime.now();
         _month = 0;
       });
+      _syncSheet();
     } on SmsPermissionDenied {
       setState(() => _error = 'برای خواندن پیامک‌های بانکی اجازه‌ی دسترسی به پیامک لازم است.');
     } catch (e) {
       setState(() => _error = 'خطا در خواندن پیامک‌ها: $e');
     } finally {
       setState(() => _loading = false);
+    }
+  }
+
+  /// Sends new transactions to the Google Sheet when automatic sending is on.
+  /// Runs after the list is on screen and only reports what changed.
+  Future<void> _syncSheet() async {
+    final settings = await SyncSettings.open();
+    if (!settings.sheetConfigured || !settings.autoSync) return;
+    String? message;
+    try {
+      final r = await syncToSheet(_ledger, settings);
+      if (r.added > 0) message = '${faDigits(r.added)} تراکنش جدید در گوگل شیت ثبت شد.';
+    } catch (e) {
+      message = 'ارسال به گوگل شیت انجام نشد: $e';
+    }
+    if (message != null && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
     }
   }
 
@@ -88,6 +109,7 @@ class _HomeScreenState extends State<HomeScreen> {
       await store.setAccountName(t.account!, result.accountName!);
     }
     setState(() {});
+    _syncSheet();
   }
 
   Future<void> _renameAccount(String account, String name) async {

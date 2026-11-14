@@ -7,18 +7,22 @@ import 'transaction.dart';
 ///
 /// [receivedOn] is the Jalali date the SMS arrived. It fills in the year for
 /// banks that only send month/day.
-Transaction? parseSms(String text, {required JalaliDate receivedOn}) {
+///
+/// Set [trustedSender] when the user marked the sender as their bank: the
+/// parser then accepts messages without a balance line and falls back to
+/// plain keywords such as «برداشت ... ریال».
+Transaction? parseSms(String text, {required JalaliDate receivedOn, bool trustedSender = false}) {
   final t = normalize(text).trim();
   for (final p in _parsers) {
-    final r = p(t, text, receivedOn);
+    final r = p(t, text, receivedOn, trustedSender);
     if (r != null) return r;
   }
   return null;
 }
 
-typedef _Parser = Transaction? Function(String t, String raw, JalaliDate receivedOn);
+typedef _Parser = Transaction? Function(String t, String raw, JalaliDate receivedOn, bool trusted);
 
-const List<_Parser> _parsers = [_parseBlu, _parseSigned];
+const List<_Parser> _parsers = [_parseBlu, _parseSigned, _parseKeyword];
 
 const _num = r'(\d[\d,]*)';
 final _balanceRe = RegExp(r'(?:مانده|موجودی)\s*:?\s*(-?)\s*' + _num);
@@ -34,7 +38,7 @@ int? _balance(String t) {
 
 /// Blu bank:
 ///   بلو / برداشت پول / ...، 557,000ریال از حساب شما پرید. / موجودی: ... / 11:59 / 1405.08.07
-Transaction? _parseBlu(String t, String raw, JalaliDate receivedOn) {
+Transaction? _parseBlu(String t, String raw, JalaliDate receivedOn, bool trusted) {
   if (!t.startsWith('بلو')) return null;
   final TransactionType type;
   if (t.contains('برداشت') || t.contains('پرید')) {
@@ -74,12 +78,13 @@ final _shortDateTimeRe =
 
 /// Generic format used by many banks: a signed amount line, account line,
 /// balance line and a short date. Lines that match nothing become the
-/// description. A balance line is required so that random messages with a
-/// "+1,000" line are not mistaken for transactions.
-Transaction? _parseSigned(String t, String raw, JalaliDate receivedOn) {
+/// description. Unless the sender is trusted, a balance line is required so
+/// that random messages with a "+1,000" line are not mistaken for
+/// transactions.
+Transaction? _parseSigned(String t, String raw, JalaliDate receivedOn, bool trusted) {
   final m = _signedRe.firstMatch(t);
   final balance = _balance(t);
-  if (m == null || balance == null) return null;
+  if (m == null || (balance == null && !trusted)) return null;
   final sign = m.group(2) ?? m.group(5)!;
   final amount = parseAmount(m.group(3) ?? m.group(4)!);
   final label = m.group(1)?.trim();
@@ -124,6 +129,43 @@ Transaction? _parseSigned(String t, String raw, JalaliDate receivedOn) {
     date: date,
     time: time,
     description: description.isEmpty ? null : description,
+    raw: raw,
+  );
+}
+
+final _rialAmountRe = RegExp(_num + r'\s*ریال');
+final _keywordAmountRe = RegExp(r'(?:برداشت|خرید|پرداخت|کسر|واریز|افزایش)[^\d\n]{0,25}?' + _num + r'(?![\d\-*])');
+
+/// Last resort for trusted senders: a debit/credit keyword and an amount
+/// (marked with «ریال», or else right after the keyword).
+Transaction? _parseKeyword(String t, String raw, JalaliDate receivedOn, bool trusted) {
+  if (!trusted) return null;
+  final credit = RegExp('واریز|افزایش|نشست').hasMatch(t);
+  final debit = RegExp('برداشت|خرید|پرداخت|کسر|پرید').hasMatch(t);
+  if (credit == debit) return null;
+  final withoutBalance = t.replaceAll(_balanceRe, '');
+  final m = _rialAmountRe.firstMatch(withoutBalance) ?? _keywordAmountRe.firstMatch(withoutBalance);
+  if (m == null) return null;
+  final amount = parseAmount(m.group(1)!);
+  if (amount == 0) return null;
+
+  JalaliDate? date;
+  final d = _fullDateRe.firstMatch(t);
+  if (d != null) {
+    date = JalaliDate(int.parse(d.group(1)!), int.parse(d.group(2)!), int.parse(d.group(3)!));
+  } else {
+    final sd = _shortDateTimeRe.firstMatch(t);
+    if (sd != null) date = _inferYear(int.parse(sd.group(1)!), int.parse(sd.group(2)!), receivedOn);
+  }
+  final tm = _timeRe.firstMatch(t);
+  return Transaction(
+    bank: null,
+    type: credit ? TransactionType.credit : TransactionType.debit,
+    amount: amount,
+    balance: _balance(t),
+    account: RegExp(r'(?:حساب|کارت)\s*:?\s*([\d*.\-]{4,})').firstMatch(t)?.group(1),
+    date: date ?? receivedOn,
+    time: tm == null ? null : _fmtTime(tm.group(1)!, tm.group(2)!),
     raw: raw,
   );
 }
